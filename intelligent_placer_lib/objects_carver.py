@@ -33,8 +33,8 @@ predefined_convex_hulls = [
     get_rect([1050,300]),
     get_rect([1050,300]),
     get_rect([1050,300]),
-    [[0,600],[50,290],[50,850],[270,1370],[900,1160],[1170,600]],
-    [[0,600],[50,290],[50,850],[270,1370],[900,1160],[1170,600]],
+    [[600,0],[50,290],[50,850],[270,1370],[900,1160],[1170,600]],
+    [[600,0],[50,290],[50,850],[270,1370],[900,1160],[1170,600]],
     get_ideal_polygon(500, 8),
     get_ideal_polygon(500, 8),
     get_ideal_polygon(500, 8),
@@ -164,7 +164,7 @@ def thresh_callback(src, threshold):
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (15, 15))
     closed = cv2.morphologyEx(canny_output, cv2.MORPH_CLOSE, kernel)
     
-    _, contours, hierarchy = cv2.findContours(closed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contours, hierarchy = cv2.findContours(closed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     # contours = filter(lambda cont: cv2.arcLength(cont, False) > 10, contours)
     num_cnt = 0
     for i, c in enumerate(contours):
@@ -278,6 +278,7 @@ def find_objects_on_img(path, verbose=False):
     single_item_files = [f for f in listdir(single_item_dataset_directory) if
                          isfile(join(single_item_dataset_directory, f))]
 
+    single_item_files.sort(key=lambda s: int(s.rstrip('.jpg')))
     best_matches = []
     best_matches_len = []
     best_matches_imgs = []
