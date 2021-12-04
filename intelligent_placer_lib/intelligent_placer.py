@@ -1,18 +1,10 @@
-import placer
-import objects_carver
+from intelligent_placer_lib import placer, objects_carver
 
 
-def check_image(path, polygon=None):
+def check_image(path, polygon=None, verbose=False):
     objects_convex_hull = objects_carver.find_objects_on_img(path)
     if polygon is None:
         raise Exception("polygon is empty")
 
-    result = placer.can_pack(polygon, objects_convex_hull)
+    result = placer.can_pack(polygon, objects_convex_hull, verbose=verbose)
     return result
-
-
-if __name__ == '__main__':
-    path = "C:\\Users\\Nikita\\Intelligent-placer-and-checker"
-    ans = check_image(path, [[1, 1], [1, 1], [1, 1]])
-
-    print(ans)

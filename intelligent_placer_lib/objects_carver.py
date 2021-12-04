@@ -13,7 +13,7 @@ from imageio import imread
 from sklearn.cluster import DBSCAN
 from sklearn.preprocessing import StandardScaler
 
-from placer import placer, get_rect, get_ideal_polygon
+from intelligent_placer_lib.placer import get_rect, get_ideal_polygon
 
 # 2850x4000
 
@@ -269,79 +269,39 @@ def match_points_via_orb_detector(src, dst, good_match_threshold, verbose=True):
 
 
 def find_objects_on_img(path, verbose=False):
-    objects_convex_hull = []
-    # TODO get hull
-    return objects_convex_hull
-
-
-
-if __name__ == "__main__":
-    projectDirectory = "C:\\Users\\Nikita\\Intelligent-placer-and-checker"
-    placerDirectory = "PlacerDataset"
-    fullDirectory = join(projectDirectory, placerDirectory)
-    polygon_points = [[0, 0], [0, 3800], [1200, 3800], [1500, 1500], [1500, 1000], [1300, 0]]
-
-    allFiles = [f for f in listdir(fullDirectory) if isfile(join(fullDirectory, f))]
-    print(len(allFiles))
-
     thresh = 100
-    cropped_objects = []
-    for i in range(len(allFiles)):
-    
-        fig, ax = plt.subplots(1, 2, figsize=(15, 10))
-        
-        filename = allFiles[i]
-        image = read_image(filename, fullDirectory)
-        #image = crop_by_mask(image)
-    
-        result, cropped_objects_i = thresh_callback(image, thresh)
+    image = read_image(path, "")
 
-        ax.flatten()[0].imshow(result)
-        ax.flatten()[1].imshow(image)    
-        
-        fig1, ax1 = plt.subplots(1, len(cropped_objects_i), figsize=(15, 10))
-        for i, image in enumerate(cropped_objects_i):
-            ax1.flatten()[i].imshow(image)
-        cropped_objects.append(cropped_objects_i)
-    
-    single_item_dataset_directory = join(projectDirectory,"ML2021Dataset")
-    single_item_files = [f for f in listdir(single_item_dataset_directory) if isfile(join(single_item_dataset_directory, f))]
-    placer_dataset_directory = fullDirectory
-    placer_files = [f for f in listdir(placer_dataset_directory) if isfile(join(placer_dataset_directory, f))]
+    result, cropped_objects = thresh_callback(image, thresh)
 
-    for batch in cropped_objects:
-        best_matches = []
-        best_matches_len = []
-        best_matches_imgs = []
-        best_matches_polygons = []
-        for fragment in batch:
-            src = cv2.cvtColor(fragment, cv2.COLOR_BGR2GRAY)
-            best_match = 0
-            best_match_len = 0
-            best_img = cv2.imread(join(single_item_dataset_directory, single_item_files[0]))
-            best_i = 1
-            for i, single_item_file in enumerate(single_item_files, 0):
-                dst = cv2.imread(join(single_item_dataset_directory, single_item_file))
-                # dst = cut_edges(dst, 0.13)
-                dst = cv2.cvtColor(dst, cv2.COLOR_BGR2GRAY)
-                matches = match_points_via_orb_detector(src, dst, 35)
-                len_matches = len(matches)
-                if len_matches > best_match_len:
-                    best_match_len = len_matches
-                    best_img = dst
-                    best_match = matches
-                    best_i = i
-            best_matches.append(best_match)
-            best_matches_len.append(best_match_len)
-            best_matches_imgs.append(best_img)
-            best_matches_polygons.append(predefined_convex_hulls[best_i])
-        # for l, img, src in zip(best_matches_len, best_matches_imgs, batch):
-        #     print(l)
-        #     fig, ax = plt.subplots(1, 2, figsize=(15, 10))
-        #     ax.flatten()[0].imshow(src)
-        #     ax.flatten()[1].imshow(img)    
-        #     plt.show()
-        placer(polygon_points,best_matches_polygons)
+    single_item_dataset_directory = os.path.join(os.path.curdir, "intelligent_placer_lib", "ML2021Dataset")
+    single_item_files = [f for f in listdir(single_item_dataset_directory) if
+                         isfile(join(single_item_dataset_directory, f))]
 
-    # polygon_points = [[0, 0], [0, 1900], [600, 1900], [750, 750], [750, 500], [650, 0]]
-    # placer(polygon_points,[],1000,300,1)
+    best_matches = []
+    best_matches_len = []
+    best_matches_imgs = []
+    best_matches_polygons = []
+    for fragment in cropped_objects:
+        src = cv2.cvtColor(fragment, cv2.COLOR_BGR2GRAY)
+        best_match = 0
+        best_match_len = 0
+        best_img = cv2.imread(join(single_item_dataset_directory, single_item_files[0]))
+        best_i = 1
+        for i, single_item_file in enumerate(single_item_files, 0):
+            dst = cv2.imread(join(single_item_dataset_directory, single_item_file))
+            # dst = cut_edges(dst, 0.13)
+            dst = cv2.cvtColor(dst, cv2.COLOR_BGR2GRAY)
+            matches = match_points_via_orb_detector(src, dst, 35)
+            len_matches = len(matches)
+            if len_matches > best_match_len:
+                best_match_len = len_matches
+                best_img = dst
+                best_match = matches
+                best_i = i
+        best_matches.append(best_match)
+        best_matches_len.append(best_match_len)
+        best_matches_imgs.append(best_img)
+        best_matches_polygons.append(predefined_convex_hulls[best_i])
+
+    return best_matches_polygons
