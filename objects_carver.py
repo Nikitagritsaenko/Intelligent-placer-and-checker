@@ -1,30 +1,18 @@
 from __future__ import print_function
-import matplotlib.pyplot as plt
-import numpy as np
+
 import os
-import cv
-import cv2
-from imageio import imread, imsave
-from skimage.feature import canny
-from skimage.filters import gaussian
-from skimage.color import rgb2gray
-from skimage.util import img_as_ubyte
-from skimage.filters import threshold_otsu, rank, try_all_threshold, threshold_li, threshold_local
-from skimage.transform import (hough_line, hough_line_peaks, probabilistic_hough_line)
-from matplotlib import cm
-from matplotlib.patches import Rectangle
-from scipy.ndimage.morphology import binary_fill_holes
-from skimage.morphology import watershed, binary_erosion, binary_opening, disk, binary_closing
-from sklearn.cluster import DBSCAN
-import matplotlib.pyplot as plt
-from sklearn.preprocessing import StandardScaler
 from collections import Counter
-from random import sample
-import numpy as np
-import argparse
-import random as rng
 from os import listdir
 from os.path import isfile, join
+from random import sample
+
+import cv2
+import matplotlib.pyplot as plt
+import numpy as np
+from imageio import imread
+from sklearn.cluster import DBSCAN
+from sklearn.preprocessing import StandardScaler
+
 from placer import placer, get_rect, get_ideal_polygon
 
 # 2850x4000
@@ -51,14 +39,14 @@ predefined_convex_hulls = [
     get_ideal_polygon(500, 8),
     get_ideal_polygon(500, 8),
     get_ideal_polygon(500, 8),
-    [[0,250],[50,50],[200,0],[180,630],[380,640],[530,250],[470,50]],
-    [[0,250],[50,50],[200,0],[180,630],[380,640],[530,250],[470,50]],
-    [[0,250],[50,50],[200,0],[180,630],[380,640],[530,250],[470,50]],
-    [[0,250],[50,50],[200,0],[180,630],[380,640],[530,250],[470,50]],
-    [[0,250],[50,50],[200,0],[180,630],[380,640],[530,250],[470,50]],
-    [[0,250],[50,50],[200,0],[180,630],[380,640],[530,250],[470,50]],
-    [[0,250],[50,50],[200,0],[180,630],[380,640],[530,250],[470,50]],
-    [[0,250],[50,50],[200,0],[180,630],[380,640],[530,250],[470,50]],
+    [[250,0],[50,50],[0,200],[180,630],[380,640],[530,250],[470,50]],
+    [[250, 0], [50, 50], [0, 200], [180, 630], [380, 640], [530, 250], [470, 50]],
+    [[250, 0], [50, 50], [0, 200], [180, 630], [380, 640], [530, 250], [470, 50]],
+    [[250, 0], [50, 50], [0, 200], [180, 630], [380, 640], [530, 250], [470, 50]],
+    [[250, 0], [50, 50], [0, 200], [180, 630], [380, 640], [530, 250], [470, 50]],
+    [[250, 0], [50, 50], [0, 200], [180, 630], [380, 640], [530, 250], [470, 50]],
+    [[250, 0], [50, 50], [0, 200], [180, 630], [380, 640], [530, 250], [470, 50]],
+    [[250, 0], [50, 50], [0, 200], [180, 630], [380, 640], [530, 250], [470, 50]],
     get_rect([800,500]),
     get_rect([800,500]),
     get_rect([800,500]),
@@ -176,7 +164,7 @@ def thresh_callback(src, threshold):
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (15, 15))
     closed = cv2.morphologyEx(canny_output, cv2.MORPH_CLOSE, kernel)
     
-    contours, hierarchy = cv2.findContours(closed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    _, contours, hierarchy = cv2.findContours(closed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     # contours = filter(lambda cont: cv2.arcLength(cont, False) > 10, contours)
     num_cnt = 0
     for i, c in enumerate(contours):
@@ -281,13 +269,12 @@ def match_points_via_orb_detector(src, dst, good_match_threshold, verbose=True):
 
 
 if __name__ == "__main__":
-    projectDirectory = "C:\\Users\\gosha\\Documents\\Github\\Intelligent-placer-and-checker"
+    projectDirectory = "C:\\Users\\Nikita\\Intelligent-placer-and-checker"
     placerDirectory = "PlacerDataset"
     fullDirectory = join(projectDirectory, placerDirectory)
-    polygon_points = [[0, 0], [0, 19000], [6000, 19000], [7500, 7500], [7500, 5000], [6500, 0]]
+    polygon_points = [[0, 0], [0, 3800], [1200, 3800], [1500, 1500], [1500, 1000], [1300, 0]]
 
     allFiles = [f for f in listdir(fullDirectory) if isfile(join(fullDirectory, f))]
-    allfiles = allFiles[0]
     print(len(allFiles))
 
     thresh = 100
@@ -326,13 +313,13 @@ if __name__ == "__main__":
             best_match_len = 0
             best_img = cv2.imread(join(single_item_dataset_directory, single_item_files[0]))
             best_i = 1
-            for i, single_item_file in enumerate(single_item_files):
+            for i, single_item_file in enumerate(single_item_files, 0):
                 dst = cv2.imread(join(single_item_dataset_directory, single_item_file))
                 # dst = cut_edges(dst, 0.13)
                 dst = cv2.cvtColor(dst, cv2.COLOR_BGR2GRAY)
                 matches = match_points_via_orb_detector(src, dst, 35)
                 len_matches = len(matches)
-                if (len_matches > best_match_len):
+                if len_matches > best_match_len:
                     best_match_len = len_matches
                     best_img = dst
                     best_match = matches
@@ -340,7 +327,7 @@ if __name__ == "__main__":
             best_matches.append(best_match)
             best_matches_len.append(best_match_len)
             best_matches_imgs.append(best_img)
-            best_matches_polygons.append(predefined_convex_hulls[i])
+            best_matches_polygons.append(predefined_convex_hulls[best_i])
         # for l, img, src in zip(best_matches_len, best_matches_imgs, batch):
         #     print(l)
         #     fig, ax = plt.subplots(1, 2, figsize=(15, 10))
