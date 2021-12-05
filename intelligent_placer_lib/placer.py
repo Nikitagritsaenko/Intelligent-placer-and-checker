@@ -3,6 +3,7 @@ import numpy as np
 from shapely.geometry import Point
 from shapely.geometry.polygon import Polygon
 
+
 class MyPolygon:
     def __init__(self, points):
         self.normalized_points = MyPolygon.normalize_to_origin(points)
@@ -134,7 +135,6 @@ def placer(polygon_points, objects, N=500, M=100, verbose=False):
         if i % 20 == 0:
             if verbose:
                 print(i)
-
 
         # объекты, которые уже уложили
         ready_objects = []

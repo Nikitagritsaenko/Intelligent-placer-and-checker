@@ -2,7 +2,7 @@ from intelligent_placer_lib import placer, objects_carver
 
 
 def check_image(path, polygon=None, verbose=False):
-    objects_convex_hull = objects_carver.find_objects_on_img(path)
+    __, objects_convex_hull = objects_carver.find_objects_on_img(path)
     if polygon is None:
         raise Exception("polygon is empty")
 
