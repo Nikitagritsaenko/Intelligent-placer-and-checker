@@ -6,6 +6,7 @@ def run_intelligent_placer(path, polygon):
 
 
 if __name__ == '__main__':
-    path = "PlacerDataset/4.jpg"
-    polygon_points = [[0, 0], [0, 3800], [2200, 3800], [2600, 2600], [2600, 2100], [2400, 0]]
-    print(run_intelligent_placer(path, polygon_points))
+    polygon_points = [[0, 0], [400, 1200], [1200, 1700], [2100, 1900], [1900, -800]]
+    for i in range(1, 6):
+        path = "PlacerDataset/" + str(i) + ".jpg"
+        print(run_intelligent_placer(path, polygon_points))

@@ -3,14 +3,18 @@ import numpy as np
 from shapely.geometry import Point
 from shapely.geometry.polygon import Polygon
 
+task_counter = 0
+
 
 class MyPolygon:
-    def __init__(self, points):
+    def __init__(self, points, name):
+        self.name = name
         self.normalized_points = MyPolygon.normalize_to_origin(points)
         self.points = self.normalized_points.copy()
         self.center = [0, 0]
+        self.alpha = 0
         self.sh_polygon = Polygon(self.normalized_points)
-        self.square = self.sh_polygon.area
+        self.area = self.sh_polygon.area
 
     def is_inside(self, point):
         p1 = Point(point[0], point[1])
@@ -22,7 +26,7 @@ class MyPolygon:
     def is_overlap(self, another):
         return self.sh_polygon.intersects(another.sh_polygon)
 
-    def rotate(self, alpha):
+    def rotate_points(self, alpha):
         c_x, c_y = self.center[0], self.center[1]
         for i in range(len(self.points)):
             point = self.points[i]
@@ -30,6 +34,10 @@ class MyPolygon:
             cos = np.cos(alpha)
             sin = np.sin(alpha)
             self.points[i] = [c_x + x * cos - y * sin, c_y + x * sin + y * cos]
+
+    def rotate(self, alpha):
+        self.rotate_points(alpha)
+        self.alpha = self.alpha + alpha
         self.sh_polygon = Polygon(self.points)
 
     def set_center(self, new_center):
@@ -37,6 +45,7 @@ class MyPolygon:
             p = self.normalized_points[i]
             self.points[i] = [p[0] + new_center[0], p[1] + new_center[1]]
         self.center = new_center
+        self.rotate_points(self.alpha)
         self.sh_polygon = Polygon(self.points)
 
     @staticmethod
@@ -58,14 +67,17 @@ class MyPolygon:
         y_arr = [item[1] for item in self.points]
         ax.plot(x_arr + [x_arr[0]], y_arr + [y_arr[0]])
 
-    def is_intersects(self, ready_objects):
+    def find_intersections(self, ready_objects):
+        intersections = []
         for ready_obj in ready_objects:
+            if self is ready_obj:
+                continue
             if self.is_overlap(ready_obj):
-                return True
-        return False
+                intersections.append(ready_obj)
+        return intersections
 
 
-def plot_configuration(polygon, objects):
+def plot_configuration(polygon, objects, filename=""):
     fig, ax = plt.subplots()
     ax.plot()
 
@@ -78,7 +90,12 @@ def plot_configuration(polygon, objects):
         obj.draw(ax)
 
     plt.gca().set_aspect("equal")
-    fig.show()
+    if filename != "":
+        plt.savefig(filename)
+    else:
+        plt.savefig("solution_" + str(task_counter))
+    plt.close(fig)
+    # fig.show()
 
 
 def find_borders(polygon):
@@ -92,6 +109,28 @@ def drop_point(borders):
     x = np.random.randint(x1, x2)
     y = np.random.randint(y1, y2)
     return [x, y]
+
+
+def try_to_reconfigure(polygon, ready_objects, obj_to_move, new_object, K=50):
+    old_center = obj_to_move.center
+    move_radius = np.sqrt(obj_to_move.area / np.pi)
+    all_objects = []
+    for o in ready_objects:
+        all_objects.append(o)
+    all_objects.append(new_object)
+
+    for i in range(K):
+        x = np.random.randint(old_center[0] - move_radius / 2, old_center[0] + move_radius / 2)
+        y = np.random.randint(old_center[1] - move_radius / 2, old_center[1] + move_radius / 2)
+        obj_to_move.set_center([x, y])
+        if not polygon.is_figure_inside(obj_to_move.points):
+            continue
+        if len(obj_to_move.find_intersections(all_objects)) == 0:
+            print("получилось сдвинуть объект " + obj_to_move.name +
+                  ", который пересекался с новым объектом " + new_object.name)
+            return True
+    obj_to_move.set_center(old_center)
+    return False
 
 
 def try_to_put_object(obj, polygon, ready_objects, M):
@@ -109,26 +148,40 @@ def try_to_put_object(obj, polygon, ready_objects, M):
             if not polygon.is_inside(center_point):
                 continue
             obj.set_center(center_point)
-            obj.rotate(alpha)
+            obj.rotate(alpha_step)
 
             # проверяем, что фигура находится внутри м.у
             if not polygon.is_figure_inside(obj.points):
                 continue
-            # проверяем, что п.у не будет пересекаться с уже уложенными
-            if obj.is_intersects(ready_objects):
-                continue
-            ready_objects.append(obj)
+            # проверяем, что предмет не будет пересекаться с уже уложенными
+            intersections = obj.find_intersections(ready_objects)
 
-            return True
+            if j > M / 2 and len(intersections) == 1:
+                if try_to_reconfigure(polygon, ready_objects, intersections[0], obj):
+                    assert len(obj.find_intersections(ready_objects)) == 0
+                    ready_objects.append(obj)
+                    print([r_o.name for r_o in ready_objects])
+                    return True
+
+            if len(intersections) == 0:
+                ready_objects.append(obj)
+                return True
     return False
 
 
-def placer(polygon_points, objects, N=500, M=100, verbose=False):
-    figures = [MyPolygon(points) for points in objects]
-    polygon = MyPolygon(polygon_points)
+def placer(polygon_points, objects_names, objects, N=500, M=100, verbose=False):
+    global task_counter
+    task_counter = task_counter + 1
 
-    area_sum = sum([figure.square for figure in figures])
-    if area_sum > polygon.square:
+    figures = []
+    for i in range(len(objects)):
+        points = objects[i]
+        name = objects_names[i]
+        figures.append(MyPolygon(points, name))
+    polygon = MyPolygon(polygon_points, "многоугольник")
+
+    area_sum = sum([figure.area for figure in figures])
+    if area_sum > polygon.area:
         return False
 
     for i in range(N):
@@ -136,15 +189,22 @@ def placer(polygon_points, objects, N=500, M=100, verbose=False):
             if verbose:
                 print(i)
 
+        figures = []
+        for i in range(len(objects)):
+            points = objects[i]
+            name = objects_names[i]
+            figures.append(MyPolygon(points, name))
+        figures.sort(key=lambda f: f.area, reverse=True)
+
         # объекты, которые уже уложили
         ready_objects = []
 
         # пытаемся уложить все объекты
         for obj in figures:
-            try_to_put_object(obj, polygon, ready_objects, M)
-            # TODO: попробовать двигать предметы
+            if not try_to_put_object(obj, polygon, ready_objects, M):
+                break
 
-        if len(ready_objects) == len(objects):
+        if len(ready_objects) == len(figures):
             if verbose:
                 plot_configuration(polygon.points, ready_objects)
             return True
@@ -153,8 +213,8 @@ def placer(polygon_points, objects, N=500, M=100, verbose=False):
     return False
 
 
-def can_pack(polygon_points, objects, verbose=False):
-    return placer(polygon_points, objects, verbose=verbose)
+def can_pack(polygon_points, objects_names, objects, verbose=False):
+    return placer(polygon_points, objects_names, objects, verbose=verbose)
 
 
 def get_rect(rectangle_params, center_point=[0, 0]):
