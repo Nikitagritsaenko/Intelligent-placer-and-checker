@@ -7,7 +7,7 @@
 ### Подробная описание
 
 * [Intelligent Placer](https://docs.google.com/document/d/1o0lawEvLgmh9VrA5fUlOHFvo5JKxR4NThCFobmrKz60/edit#)
-* [Intelligent Cheker](https://docs.google.com/document/d/1Tmn7BLnHXiAsdCpB_GQVDqUx3AoGEdfOoTyn3Eg3P7A/edit#heading=h.wh4ex1kspujz)
+* [Intelligent Checker](https://docs.google.com/document/d/1Tmn7BLnHXiAsdCpB_GQVDqUx3AoGEdfOoTyn3Eg3P7A/edit#heading=h.wh4ex1kspujz)
 
 
 
@@ -18,10 +18,7 @@
 
 Требования к этим фотографиям
 
-- Белый лист занимает не менее 95% места на фотографии
-- все края и углы листа видны на фотографии
 - На фото только 1 объект
-- Все объекты выпуклые
 - Предмет и край листа А4 не пересекаются
 - Источник света должен быть строго сверху над областью фотографирования
 - Фотографировать нужно строго вертикально (перпендикулярно листу бумаги) на расстоянии не менее 50 см от листа бумаги, не допускается наличие проекций предметов // Проекционного искажения предметов
