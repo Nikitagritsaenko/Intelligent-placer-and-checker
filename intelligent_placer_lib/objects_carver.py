@@ -5,7 +5,6 @@ from collections import Counter
 from os import listdir
 from os.path import isfile, join
 from random import sample
-
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
@@ -138,7 +137,7 @@ def convex_hull(src):
     return points
 
 
-def thresh_callback(src, threshold):
+def thresh_callback(src, threshold, verbose=False):
     src_gray = cv2.cvtColor(src, cv2.COLOR_BGR2GRAY)
     src_gray = cv2.blur(src_gray, (3, 3))
     height = src.shape[0]
@@ -151,7 +150,11 @@ def thresh_callback(src, threshold):
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (15, 15))
     closed = cv2.morphologyEx(canny_output, cv2.MORPH_CLOSE, kernel)
 
-    _, contours, hierarchy = cv2.findContours(closed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    try:
+        _, contours, hierarchy = cv2.findContours(closed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    except:
+        # MChepulis: что-то с библиотекой cv2. Чтобы не портить старый код сделал заглушку
+        contours, hierarchy = cv2.findContours(closed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     # contours = filter(lambda cont: cv2.arcLength(cont, False) > 10, contours)
     num_cnt = 0
     for i, c in enumerate(contours):
@@ -175,7 +178,8 @@ def thresh_callback(src, threshold):
     drawing = np.zeros((canny_output.shape[0], canny_output.shape[1], 3), dtype=np.uint8)
 
     hierarchy = hierarchy[0]
-    print("Общее Количество контуров", num_cnt)
+    if verbose:
+        print("Общее Количество контуров", num_cnt)
 
     color = [(255, 44, 0),
              (254, 178, 0),
@@ -201,8 +205,8 @@ def thresh_callback(src, threshold):
             src[(int)(get_min(x, 0)):(int)(get_max(x + w, height)), (int)(get_min(y, 0)):(int)(get_max(y + h, width))])
         # cropped_objects.append(get_rect([1,1]))
         counter += 1
-
-    print("Длинное Количество контуров", counter)
+    if verbose:
+        print("Длинное Количество контуров", counter)
 
     # x,y,w,h 
 
@@ -235,7 +239,11 @@ def cut_edges(original_image, cut_threshold):
 
 
 def match_points(src, dst, verbose=False):
-    sift = cv2.xfeatures2d.SIFT_create(sigma=3.5)
+    try:
+        sift = cv2.xfeatures2d.SIFT_create(sigma=3.5)
+    except:
+        # MChepulis: что-то с библиотекой cv2. Чтобы не портить старый код сделал заглушку
+        sift = cv2.SIFT_create(sigma=3.5)
 
     # find the keypoints and descriptors with SIFT
     kp1, des1 = sift.detectAndCompute(src, None)
@@ -265,7 +273,7 @@ def find_objects_on_img(path, verbose=False):
     thresh = 100
     image = read_image(path, "")
 
-    result, cropped_objects = thresh_callback(image, thresh)
+    result, cropped_objects = thresh_callback(image, thresh, verbose=verbose)
 
     single_item_dataset_directory = os.path.join(os.path.curdir, "intelligent_placer_lib", "ML2021Dataset")
     single_item_files = [f for f in listdir(single_item_dataset_directory) if

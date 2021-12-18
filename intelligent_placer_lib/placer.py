@@ -4,7 +4,7 @@ from shapely.geometry import Point
 from shapely.geometry.polygon import Polygon
 
 task_counter = 0
-
+save_dir = "PlacerOutput"
 
 class MyPolygon:
     def __init__(self, points, name):
@@ -77,7 +77,7 @@ class MyPolygon:
         return intersections
 
 
-def plot_configuration(polygon, objects, filename=""):
+def plot_configuration(polygon, objects, filename="", filename_postfix=""):
     fig, ax = plt.subplots()
     ax.plot()
 
@@ -90,12 +90,17 @@ def plot_configuration(polygon, objects, filename=""):
         obj.draw(ax)
 
     plt.gca().set_aspect("equal")
-    if filename != "":
-        plt.savefig(filename)
-    else:
-        plt.savefig("solution_" + str(task_counter))
+    try:
+        if filename != "":
+            plt.savefig(filename + str(filename_postfix))
+        else:
+            plt.savefig(save_dir + "\solution_" + str(task_counter) + str(filename_postfix))
+    except FileNotFoundError as e:
+        print(f"can`t save fig: {e}'")
+
+    fig.show()
     plt.close(fig)
-    # fig.show()
+
 
 
 def find_borders(polygon):
@@ -111,7 +116,7 @@ def drop_point(borders):
     return [x, y]
 
 
-def try_to_reconfigure(polygon, ready_objects, obj_to_move, new_object, K=50):
+def try_to_reconfigure(polygon, ready_objects, obj_to_move, new_object, K=50, verbose=False):
     old_center = obj_to_move.center
     move_radius = np.sqrt(obj_to_move.area / np.pi)
     all_objects = []
@@ -126,14 +131,15 @@ def try_to_reconfigure(polygon, ready_objects, obj_to_move, new_object, K=50):
         if not polygon.is_figure_inside(obj_to_move.points):
             continue
         if len(obj_to_move.find_intersections(all_objects)) == 0:
-            print("получилось сдвинуть объект " + obj_to_move.name +
-                  ", который пересекался с новым объектом " + new_object.name)
+            if verbose:
+                print("получилось сдвинуть объект " + obj_to_move.name +
+                      ", который пересекался с новым объектом " + new_object.name)
             return True
     obj_to_move.set_center(old_center)
     return False
 
 
-def try_to_put_object(obj, polygon, ready_objects, M):
+def try_to_put_object(obj, polygon, ready_objects, M, verbose=False):
     borders = find_borders(polygon)
 
     alpha_step = 30
@@ -157,10 +163,11 @@ def try_to_put_object(obj, polygon, ready_objects, M):
             intersections = obj.find_intersections(ready_objects)
 
             if j > M / 2 and len(intersections) == 1:
-                if try_to_reconfigure(polygon, ready_objects, intersections[0], obj):
+                if try_to_reconfigure(polygon, ready_objects, intersections[0], obj, verbose=verbose):
                     assert len(obj.find_intersections(ready_objects)) == 0
                     ready_objects.append(obj)
-                    print([r_o.name for r_o in ready_objects])
+                    if verbose:
+                        print([r_o.name for r_o in ready_objects])
                     return True
 
             if len(intersections) == 0:
@@ -172,7 +179,8 @@ def try_to_put_object(obj, polygon, ready_objects, M):
 def placer(polygon_points, objects_names, objects, N=500, M=100, verbose=False):
     global task_counter
     task_counter = task_counter + 1
-
+    if not verbose:
+        plot_configuration(polygon_points, [], filename=(save_dir + f"\polygon_{task_counter}"))
     figures = []
     for i in range(len(objects)):
         points = objects[i]
@@ -187,7 +195,7 @@ def placer(polygon_points, objects_names, objects, N=500, M=100, verbose=False):
     for i in range(N):
         if i % 20 == 0:
             if verbose:
-                print(i)
+                print(f"place iter: {i}")
 
         figures = []
         for i in range(len(objects)):
@@ -201,15 +209,15 @@ def placer(polygon_points, objects_names, objects, N=500, M=100, verbose=False):
 
         # пытаемся уложить все объекты
         for obj in figures:
-            if not try_to_put_object(obj, polygon, ready_objects, M):
+            if not try_to_put_object(obj, polygon, ready_objects, M, verbose=verbose):
                 break
 
         if len(ready_objects) == len(figures):
             if verbose:
-                plot_configuration(polygon.points, ready_objects)
+                plot_configuration(polygon.points, ready_objects, filename_postfix="True")
             return True
     if verbose:
-        plot_configuration(polygon.points, ready_objects)
+        plot_configuration(polygon.points, ready_objects, filename_postfix="False")
     return False
 
 
