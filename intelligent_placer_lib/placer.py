@@ -179,7 +179,7 @@ def try_to_put_object(obj, polygon, ready_objects, M, verbose=False):
 def placer(polygon_points, objects_names, objects, N=500, M=100, verbose=False):
     global task_counter
     task_counter = task_counter + 1
-    if not verbose:
+    if verbose:
         plot_configuration(polygon_points, [], filename=(save_dir + f"\polygon_{task_counter}"))
     figures = []
     for i in range(len(objects)):
