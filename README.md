@@ -28,7 +28,7 @@
 
 **Пример фотографий**
 
-<img src="intelligent_placer_lib/ML2021Dataset/2.jpg" width="200" height="200" /> <img src="intelligent_placer_lib/ML2021Dataset/17.jpg" width="200" height="200" /> <img src="intelligent_placer_lib/ML2021Dataset/25.jpg" width="200" height="200" />
+<img src="ReadmeImages/ML2021Dataset/2.jpg" width="200" height="200" /> <img src="ReadmeImages/ML2021Dataset/17.jpg" width="200" height="200" /> <img src="ReadmeImages/ML2021Dataset/25.jpg" width="200" height="200" />
 
 
 ## Входные данные
@@ -47,7 +47,7 @@
 
 [Ссылка на примеры](https://github.com/Nikitagritsaenko/Intelligent-placer-and-checker/tree/develop/PlacerDataset)
 
-<img src="PlacerDataset/1.jpg" width="200" height="200" /> <img src="PlacerDataset/2.jpg" width="200" height="200" /> <img src="PlacerDataset/4.jpg" width="200" height="200" />
+<img src="ReadmeImages/PlacerDataset/1.jpg" width="200" height="200" /> <img src="ReadmeImages/PlacerDataset/2.jpg" width="200" height="200" /> <img src="ReadmeImages/PlacerDataset/4.jpg" width="200" height="200" />
 
 
 ## Результаты работы алгоритма
@@ -60,7 +60,7 @@
 
 **Примеры размещения**
 
-<img src="solution_2.png" width="400" height="400" /> <img src="solution_5.png" width="400" height="400" /> 
+<img src="ReadmeImages/solution_2.png" width="400" height="400" /> <img src="ReadmeImages/solution_5.png" width="400" height="400" /> 
 
 ## Файл настроек для Intelligent Cheker
 
@@ -120,3 +120,33 @@ check_image (path="PlacerDataset/1.jpg",
 * Верных ответов: 7 (63.6%)
 * Ложных ответов: 4 (36.4%)
 
+Дополнительно рассмотрим ситуацию, когда Placer никогда не ошибается в классификации предметов. То есть ложноотрицательные ответы связаны именно с размещением объектов в многоугольнике.
+Для этого сообщим Placer`у набор предметов, находящихся на каждом из примеров и, опустив шаг с классификацией, сразу перейдём к размещению объектов.
+
+Всего тестов: 11
+* Верных ответов: 10 (90.9%)
+* Ложных ответов: 1 (9.1%)
+
+# Тестовый набор:
+
+<img src="ReadmeImages/images/1.jpg" width="200" height="200" /> <img src="ReadmeImages/polygons/polygon_1.png" width="200" height="200" /> <img src="ReadmeImages/solutions/solution_1True.png" width="200" height="200" /> 
+
+<img src="ReadmeImages/images/2.jpg" width="200" height="200" /> <img src="ReadmeImages/polygons/polygon_2.png" width="200" height="200" /> <img src="ReadmeImages/solutions/solution_2True.png" width="200" height="200" /> 
+
+<img src="ReadmeImages/images/3.jpg" width="200" height="200" /> <img src="ReadmeImages/polygons/polygon_3.png" width="200" height="200" /> <img src="ReadmeImages/solutions/solution_3True.png" width="200" height="200" /> 
+
+<img src="ReadmeImages/images/1.jpg" width="200" height="200" /> <img src="ReadmeImages/polygons/polygon_4.png" width="200" height="200" /> <img src="ReadmeImages/solutions/solution_4True.png" width="200" height="200" /> 
+
+<img src="ReadmeImages/images/1.jpg" width="200" height="200" /> <img src="ReadmeImages/polygons/polygon_5.png" width="200" height="200" /> <img src="ReadmeImages/solutions/solution_5True.png" width="200" height="200" /> 
+
+<img src="ReadmeImages/images/1.jpg" width="200" height="200" /> <img src="ReadmeImages/polygons/polygon_6.png" width="200" height="200" /> <img src="ReadmeImages/solutions/solution_6True.png" width="200" height="200" /> 
+
+<img src="ReadmeImages/images/1.jpg" width="200" height="200" /> <img src="ReadmeImages/polygons/polygon_7.png" width="200" height="200" /> <img src="ReadmeImages/solutions/solution_7True.png" width="200" height="200" /> 
+
+<img src="ReadmeImages/images/3.jpg" width="200" height="200" /> <img src="ReadmeImages/polygons/polygon_8.png" width="200" height="200" /> <img src="ReadmeImages/solutions/solution_8True.png" width="200" height="200" /> 
+
+<img src="ReadmeImages/images/2.jpg" width="200" height="200" /> <img src="ReadmeImages/polygons/polygon_9.png" width="200" height="200" /> <img src="ReadmeImages/solutions/solution_9True.png" width="200" height="200" /> 
+
+<img src="ReadmeImages/images/3.jpg" width="200" height="200" /> <img src="ReadmeImages/polygons/polygon_10.png" width="200" height="200" /> <img src="ReadmeImages/solutions/solution_10True.png" width="200" height="200" /> 
+
+<img src="ReadmeImages/images/2.jpg" width="200" height="200" /> <img src="ReadmeImages/polygons/polygon_1.png" width="200" height="200" /> <img src="ReadmeImages/solutions/solution_11True.png" width="200" height="200" /> 
