@@ -1,4 +1,4 @@
-from intelligent_placer_lib import placer, objects_carver
+from intelligent_gritsaenko_placer.intelligent_placer_lib import placer, objects_carver
 
 
 def check_image(path, polygon=None, verbose=False):

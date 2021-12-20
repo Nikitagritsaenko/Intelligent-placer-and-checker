@@ -13,7 +13,7 @@ from imageio import imread
 from sklearn.cluster import DBSCAN
 from sklearn.preprocessing import StandardScaler
 
-from intelligent_placer_lib.placer import get_rect, get_ideal_polygon
+from intelligent_gritsaenko_placer.intelligent_placer_lib.placer import get_rect, get_ideal_polygon
 
 # 2850x4000
 
@@ -151,7 +151,7 @@ def thresh_callback(src, threshold):
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (15, 15))
     closed = cv2.morphologyEx(canny_output, cv2.MORPH_CLOSE, kernel)
 
-    _, contours, hierarchy = cv2.findContours(closed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contours, hierarchy = cv2.findContours(closed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     # contours = filter(lambda cont: cv2.arcLength(cont, False) > 10, contours)
     num_cnt = 0
     for i, c in enumerate(contours):
@@ -235,7 +235,7 @@ def cut_edges(original_image, cut_threshold):
 
 
 def match_points(src, dst, verbose=False):
-    sift = cv2.xfeatures2d.SIFT_create(sigma=3.5)
+    sift = cv2.SIFT_create(sigma=3.5)
 
     # find the keypoints and descriptors with SIFT
     kp1, des1 = sift.detectAndCompute(src, None)
@@ -267,7 +267,8 @@ def find_objects_on_img(path, verbose=False):
 
     result, cropped_objects = thresh_callback(image, thresh)
 
-    single_item_dataset_directory = os.path.join(os.path.curdir, "intelligent_placer_lib", "ML2021Dataset")
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    single_item_dataset_directory = os.path.join(dir_path, "ML2021Dataset")
     single_item_files = [f for f in listdir(single_item_dataset_directory) if
                          isfile(join(single_item_dataset_directory, f))]
 
